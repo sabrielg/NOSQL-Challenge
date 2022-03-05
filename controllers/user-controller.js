@@ -4,7 +4,7 @@ const userController = {
   getAllUser(req, res) {
     User.find({})
       .populate({
-        path: 'comments',
+        path: 'thought',
         select: '-__v'
       })
       .select('-__v')
@@ -44,7 +44,7 @@ const userController = {
       },
 
       updateUser({ params, body }, res) {
-        Pizza.findOneAndUpdate({ _id: params.id }, body, { new: true , runValidators: true})
+        User.findOneAndUpdate({ _id: params.id }, body, { new: true , runValidators: true})
           .then(dbUserData => {
             if (!dbUserData) {
               res.status(404).json({ message: 'No user found with this id!' });
@@ -65,6 +65,20 @@ const userController = {
             res.json(dbUserData);
           })
           .catch(err => res.status(400).json(err));
+      },
+
+      addFriend({ params }, res) {
+          User.findOneAndUpdate(
+              {_id: params.userId},
+              { $push: {friends: params.friendId }}
+          )
+          .then(dbUserData => {
+              if (!dbUserData) {
+                  res.status(404).json ({ message: 'No user found with this id!'});
+                  return
+              }
+              User
+          })
       }
       };
 
