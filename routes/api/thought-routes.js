@@ -6,13 +6,12 @@ router.route('/').get(getAllThoughts)
 router.route('/:userId').post(addThought);
 
 router.route('/:userId/:thoughtId')
-// .put(addReaction)
+.put(addReaction)
 .delete(removeThought);
 
-router.route('/api/thoughts/:thoughtId/reactions')
+router.route('/:thoughtId/reactions')
 .post(addReaction)
-.delete(removeReaction)
 
-router.route('/:UserId/:thoughtId/:reactionId').delete(removeReaction);
+router.route('/:thoughtId/reactions/:reactionId').delete(removeReaction);
 
 module.exports = router;

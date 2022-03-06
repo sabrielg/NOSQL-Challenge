@@ -3,10 +3,10 @@ const { User,Thought  } = require('../models');
 const thoughtController = {
     getAllThoughts(req, res) {
         Thought.find({})
-          .populate({
-            path: 'thoughts',
-            select: '-__v'
-          })
+        //   .populate({
+        //     path: 'thoughts',
+        //     select: '-__v'
+        //   })
           .select('-__v')
           .sort({ _id: -1 })
           .then(dbThoughtData => res.json(dbThoughtData))
@@ -15,11 +15,12 @@ const thoughtController = {
             res.status(400).json(err);
           });
       },
+
   addThought({ params, body }, res) {
     console.log(body); 
     Thought.create(body)
       .then(({ _id }) => {
-        return Thought.findOneAndUpdate(
+        return User.findOneAndUpdate(
           { _id: params.userId },
           { $push: { thoughts: _id } },
           { new: true }
@@ -38,7 +39,7 @@ const thoughtController = {
   addReaction({ params, body }, res) {
     Thought.findOneAndUpdate(
       { _id: params.thoughtId },
-      { $push: { replies: body } },
+      { $push: { reactions: body } },
       { new: true, runValidators: true }
     )
       .then(dbUserData => {
@@ -54,21 +55,22 @@ const thoughtController = {
   removeReaction({params}, res){
     Thought.findOneAndUpdate(
       { _id: params.thoughtId },
-      { $pull: { replies: {reactionId: params.reactionId }}},
+      { $pull: { reactions: {reactionId: params.reactionId }}},
       { new: true }
     )
     .then(dbUserData => res.json(dbUserData))
     .catch(err => res.json(err))
   },
+
   removeThought({ params }, res) {
-    Comment.findOneAndDelete({ _id: params.thoughtId })
+    Thought.findByIdAndRemove({ _id: params.thoughtId })
       .then(deletedThought => {
         if (!deletedThought) {
           return res.status(404).json({ message: 'No user with this id!' });
         }
-        return Thought.findOneAndUpdate(
+        return User.findOneAndUpdate(
           { _id: params.userId },
-          { $pull: { comments: params.thoughtId } },
+          { $pull: { thoughts: params.thoughtId } },
           { new: true }
         );
       })
